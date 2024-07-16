@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 int main(){
-	int pipe1[2]; //foo to bar
-	int pipe2[2]; // bar to foo
+	int pipe1[2]; //foo to bar FOO WRITE TO THIS
+	int pipe2[2]; // bar to foo BAR WRITE TO THIS foo 
 	char input[20];
 	char output[20];
 	char buffer[20];
@@ -20,8 +21,8 @@ int main(){
 	if (pid1 ==0 ){
 		close(pipe1[R]);
         	close(pipe2[W]);
+		snprintf(input, 20, "%d", pipe2[R]);
         	snprintf(output, 20, "%d", pipe1[W]);
-        	snprintf(input, 20, "%d", pipe2[R]);
         	if (execlp("./foo", "foo", input, output, NULL) == -1){
                 	perror("foo side failed");
         	        return -1;
@@ -43,4 +44,11 @@ int main(){
                 	return -1;
         	}
 	}
+	close(pipe1[R]);
+	close(pipe2[W]);
+	close(pipe1[W]);
+        close(pipe2[R]);
+	wait(NULL);
+	wait(NULL);
+	return 0;
 }
